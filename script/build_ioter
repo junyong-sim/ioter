@@ -6,8 +6,18 @@ CONFIG_SCRIPT="./script/_config"
 test -r ${CONFIG_SCRIPT} && . ${CONFIG_SCRIPT}
 
 TYPE_PARAM="$1"
+if [[ "$OSTYPE" = "linux"* ]]; then
+BUILD_TARGET="linux-x64-all-clusters-asan-clang"
+elif [[ "$OSTYPE" = "darwin"* ]]; then
+BUILD_TARGET="darwin-arm64-all-clusters-asan"
+fi
 CONNECTEDHOMEIP_DIR=${IOTER_DIR}"/third_party/ioter-stable"
+# CONNECTEDHOMEIP_DIR=${IOTER_DIR}"/third_party/connectedhomeip"
+if [[ "$OSTYPE" = "linux"* ]]; then
 OUTPUT=${CONNECTEDHOMEIP_DIR}"/out/linux-x64-all-clusters-asan-clang-${TYPE_PARAM}/chip-all-clusters-app"
+elif [[ "$OSTYPE" = "darwin"* ]]; then
+OUTPUT=${CONNECTEDHOMEIP_DIR}"/out/darwin-arm64-all-clusters-asan-${TYPE_PARAM}/chip-all-clusters-app"
+fi
 
 HELP_STR="Please, use build_ioter with following options.
 ./script/build_ioter fed
@@ -16,7 +26,8 @@ HELP_STR="Please, use build_ioter with following options.
 
 install_chip_all_clusters_app()
 {
-    INSTALL_NAME=${IOTER_BIN_DIR}"/chip-all-clusters-app-build-${TYPE_PARAM}"
+    # INSTALL_NAME=${IOTER_BIN_DIR}"/chip-all-clusters-app-build-${TYPE_PARAM}"
+    INSTALL_NAME=${IOTER_BIN_DIR}"/chip-all-clusters-app-${TYPE_PARAM}"
     echo "install chip-all-clusters-app to ${INSTALL_NAME}"
     cp ${OUTPUT} ${INSTALL_NAME}
 }
@@ -25,9 +36,7 @@ build_chip_all_clusters_app()
 {
     cd "${CONNECTEDHOMEIP_DIR}"
     . scripts/activate.sh
-
-    #./scripts/run_in_build_env.sh "./scripts/build/build_examples.py --target linux-x64-all-clusters-asan-clang-${TYPE_PARAM} build"
-    ./scripts/run_in_build_env.sh "./scripts/build/build_examples.py --target darwin-arm64-all-clusters-no-ble-asan build"
+    ./scripts/run_in_build_env.sh "./scripts/build/build_examples.py --target ${BUILD_TARGET}-${TYPE_PARAM} build"
     
     if [ $? -eq 0 ];then
         echo "chip-all-clusters-app is generated"
