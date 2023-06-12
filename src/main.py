@@ -41,6 +41,7 @@ from common.manage_usb import UsbMonitor
 from common.utils import Utils
 from common.config import Config
 from common.help_window import *
+from common.process_controller import *
 from automation.automationmain import automationWindow
 from auto_onboarding.autod import *
 from auto_onboarding.auto_onboardingmain import auto_onboardingWindow
@@ -398,11 +399,6 @@ class MainWindow(QMainWindow,
             event.ignore()
         self.default_config.save()
 
-    ## Hanlde key press event ##
-    def keyPressEvent(self, event):
-        if event.key() == Qt.Key_Escape:
-            self.close()
-
     ## Save position ##
     def savePos(self):
         self.cur_pos = self.frameGeometry()
@@ -447,9 +443,23 @@ class MainWindow(QMainWindow,
 
     ## Check key Press Event ##
     def keyPressEvent(self, event):
+        print('keyPressEvent')
         if event.key() == Qt.Key_F12:
             self.window_manager.showGuide()
             self.window_manager.dumpRectangles()
+        elif event.key() == Qt.Key_Escape:
+            self.close()
+
+    ## Check key Press Event ##
+    def mousePressEvent(self, event):
+        print('mousePressEvent')
+        if ProcessController.is_terminating():
+            re = QMessageBox.information(self, "Info", "Please, wait for a few seconds.\nWe are terminating devices safely.",
+                                      QMessageBox.Ok, QMessageBox.Ok)
+            if re == QMessageBox.Ok:
+                event.accept()
+            else:
+                event.ignore()
 
     ## Check Directory ##
     def checkDir(self):

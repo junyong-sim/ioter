@@ -44,8 +44,13 @@ class ProcessController():
     "--thread-debug %s --device-num %s "\
     "--vendor-id %s --product-id %s "
 
+    IS_TERMINATING = 0
+    def is_terminating():
+        return ProcessController.IS_TERMINATING
+
     ## Init class ##
     def __init__(self):
+        ProcessController.IS_TERMINATING = 0
         self.pid = -1
 
     ## Get PID ##
@@ -85,7 +90,9 @@ class ProcessController():
     ## Terminate chip all clusters process ##
     def terminate_chip_all_clusters(self, device_info, terminated=True):
         if self.pid != -1:
+            ProcessController.IS_TERMINATING = 1
             self.terminate_process_tree()
+            ProcessController.IS_TERMINATING = 0
         if terminated:
             Utils.remove_matter_files(device_info.device_num)
             Utils.remove_thread_setting_file(device_info.thread_setting_file)
